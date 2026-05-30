@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쭈노우맨 관찰하기 . . .</title>
+
+<style>
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:sans-serif;
+}
+
+body{
+    background:
+        radial-gradient(circle at top,#ffffff,#eef6ff 60%,#dfefff);
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+/* 정보창 */
+#panel{
+    position:fixed;
+    top:15px;
+    left:15px;
+    padding:14px 18px;
+    background:rgba(255,255,255,.75);
+    backdrop-filter:blur(8px);
+    border-radius:16px;
+    z-index:1000;
+}
+
+#panel h3{
+    margin:0 0 8px 0;
+}
+
+/* 쭈노우맨 */
+#euiju{
+    position:absolute;
+    width:140px;
+    user-select:none;
+    cursor:grab;
+    z-index:100;
+}
+
+/* 발자국 */
+.footprint{
+    position:absolute;
+    color:#bfc8d8;
+    font-size:16px;
+    pointer-events:none;
+    opacity:.8;
+    animation:fade 8s linear forwards;
+}
+
+@keyframes fade{
+    to{
+        opacity:0;
+    }
+}
+
+/* 말풍선 */
+#bubble{
+    position:absolute;
+    padding:8px 12px;
+    background:white;
+    border-radius:12px;
+    display:none;
+    z-index:101;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+/* 눈 */
+.snow{
+    position:absolute;
+    color:white;
+    pointer-events:none;
+    opacity:.9;
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+@keyframes waddle{
+    0%{ transform: translateY(0px) rotate(-3deg); }
+    25%{ transform: translateY(-4px) rotate(-1deg); }
+    50%{ transform: translateY(0px) rotate(3deg); }
+    75%{ transform: translateY(-4px) rotate(1deg); }
+    100%{ transform: translateY(0px) rotate(-3deg); }
+}
+
+
+#panel{
+position:fixed;
+top:18px;
+left:18px;
+width:300px;
+padding:16px 18px;
+background:rgba(255,255,255,.28);
+backdrop-filter:blur(24px);
+-webkit-backdrop-filter:blur(24px);
+border:1px solid rgba(255,255,255,.35);
+border-radius:28px;
+box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+
+.panelTitle{
+font-size:13px;
+font-weight:600;
+color:#8094b7;
+margin-bottom:12px;
+}
+
+.stats{
+display:flex;
+justify-content:space-between;
+}
+
+.stat{text-align:center;flex:1;}
+
+.value{
+font-size:30px;
+font-weight:700;
+line-height:1;
+color:#5d7ba8;
+}
+
+.label{
+margin-top:6px;
+font-size:12px;
+color:#92a5c2;
+}
+
+#timeWidget{
+position:fixed;
+left:18px;
+bottom:18px;
+padding:14px 18px;
+background:rgba(255,255,255,.28);
+backdrop-filter:blur(24px);
+-webkit-backdrop-filter:blur(24px);
+border:1px solid rgba(255,255,255,.35);
+border-radius:24px;
+box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+
+.timeLabel{
+font-size:12px;
+color:#92a5c2;
+}
+
+#observeTime{
+font-size:26px;
+font-weight:700;
+color:#5d7ba8;
+}
+
+
+#helpBtn{
+position:fixed;
+top:20px;
+right:20px;
+width:42px;
+height:42px;
+border:none;
+border-radius:50%;
+background:rgba(255,255,255,.28);
+backdrop-filter:blur(24px);
+color:#6d86b2;
+font-size:22px;
+font-weight:700;
+cursor:pointer;
+z-index:1200;
+}
+
+#helpOverlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.18);
+backdrop-filter:blur(4px);
+z-index:2000;
+align-items:center;
+justify-content:center;
+}
+
+#helpModal{
+width:420px;
+max-width:85vw;
+padding:24px;
+border-radius:28px;
+background:rgba(255,255,255,.82);
+backdrop-filter:blur(24px);
+box-shadow:0 15px 40px rgba(0,0,0,.12);
+color:#5f759f;
+line-height:1.7;
+}
+
+.helpTitle{
+font-size:22px;
+font-weight:700;
+margin-bottom:12px;
+}
+
+.helpFooter{
+margin-top:18px;
+text-align:center;
+opacity:.8;
+}
+
+#closeHelp{
+margin-top:16px;
+width:100%;
+padding:10px;
+border:none;
+border-radius:14px;
+cursor:pointer;
+background:#edf4ff;
+color:#5f759f;
+}
+
+</style>
+</head>
+<body>
+
+<div id="panel">
+    <div class="panelTitle">쭈노우맨 관찰하기 . . . </div>
+    <div class="stats">
+        <div class="stat">
+            <div class="value"><span id="distance">0</span></div>
+            <div class="label">총총</div>
+        </div>
+        <div class="stat">
+            <div class="value"><span id="orangeCount">0</span></div>
+            <div class="label">먹은귤</div>
+        </div>
+        <div class="stat">
+            <div class="value"><span id="dragCount">0</span></div>
+            <div class="label">교감</div>
+        </div>
+    </div>
+
+<div id="collectionShelf" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+<div id="giftTooltip" style="display:none;margin-top:8px;font-size:12px;color:#7f92b3;line-height:1.5;"></div>
+</div>
+
+<div id="allGiftBadge" style="display:none;position:fixed;left:26px;bottom:110px;font-size:11px;color:#92a5c2;pointer-events:none;">
+모든 선물을 발견했다!
+</div>
+
+<div id="timeWidget">
+  
+  <div class="timeLabel">관찰 시간</div>
+  <div id="observeTime">00:00:00</div>
+</div>
+
+<button id="orangeBtn" style="position:fixed;right:24px;bottom:24px;width:70px;height:70px;border:none;border-radius:50%;cursor:pointer;z-index:1000;font-size:30px;background:rgba(255,255,255,.28);backdrop-filter:blur(24px);box-shadow:0 8px 24px rgba(0,0,0,.06);">
+🍊
+</button>
+
+<div id="bubble">...</div>
+
+<button id="helpBtn">?</button>
+
+<button id="debugBtn" style="position:fixed;top:70px;right:20px;width:42px;height:42px;border:none;border-radius:50%;background:rgba(255,255,255,.28);backdrop-filter:blur(24px);font-size:18px;cursor:pointer;z-index:1200;">⚙</button>
+
+<div id="debugPanel" style="display:none;position:fixed;top:120px;right:20px;padding:12px;background:rgba(255,255,255,.85);backdrop-filter:blur(24px);border-radius:16px;z-index:2200;">
+<button id="testSleep">😴 잠자기</button><br><br>
+<button id="testLook">👀 두리번</button><br><br>
+<button id="testOrange">🍊 귤생각</button><br><br>
+<button id="testJump">🦘 폴짝</button><br><br>
+<button id="testHappy">🎵 행복산책</button><br><br>
+<button id="testEat">🍊 냠!</button><br><br>
+<button id="testSparkle">✨ 반짝</button><br><br><button id="testGift">🎁 선물놓기</button><br><br><button id="testAllGifts">❄ 선물 올클리어</button>
+</div>
+
+<div id="helpOverlay">
+  <div id="helpModal">
+    <div class="helpTitle">☃️ 쭈노우맨 관찰 가이드</div>
+
+    <p>쭈노우맨을 관찰해 보세요 . . .</p>
+
+    <p>❆ 귤 버튼을 누르면 화면 중앙에 귤이 생성됩니다. 생성된 귤을 드래그해 쭈노우맨에게 건네주세요.</p>
+
+    <p>❆ 쭈노우맨을 드래그해서 이동시켜보세요.</p>
+
+    <p>❆ 남겨진 발자국은 시간이 지나면 천천히 사라집니다.</p>
+
+    <p>❆ 쭈노우맨의 행동을 지켜보세요 . . .</p>
+
+    <div class="helpFooter">
+      ver. 1.0<br>
+      	
+
+。 。 ゜。・゜ ❅。 ❅・。・。 ゜・ 。 。 ゜。・゜ ❅。 ❅・。・。 ゜・ 。 。
+    </div>
+
+    <button id="closeHelp">닫기</button>
+  </div>
+</div>
+
+
+<img id="euiju" src="euiju.png" draggable="false">
+
+<script>
+
+const euiju = document.getElementById("euiju");
+const bubble = document.getElementById("bubble");
+euiju.ondragstart = () => false;
+
+let x = window.innerWidth/2;
+let y = window.innerHeight/2;
+
+let vx = 0.7;
+let vy = 0.5;
+
+let dragging = false;
+let sleeping = false;
+
+let totalDistance = 0;
+let dragCount = 0;
+
+let targetX = x;
+let targetY = y;
+let mouseSpeed = 0;
+let prevTargetX = x;
+let prevTargetY = y;
+
+const distanceText = document.getElementById("distance");
+const dragText = document.getElementById("dragCount");
+const orangeBtn = document.getElementById("orangeBtn");
+const orangeCountText = document.getElementById("orangeCount");
+
+let orange = null;
+let orangeX = 0;
+let orangeY = 0;
+let happy = false;
+let happyStart = 0;
+let orangeCount = 0;
+let happyWalk = false;
+let happyWalkEnd = 0;
+
+let lookingAround = false;
+let lookStart = 0;
+
+let thinkingOrange = false;
+let orangeThinkStart = 0;
+
+let jumping = false;
+let jumpStart = 0;
+
+let giftEvent = false;
+let giftStart = 0;
+
+
+function isBusy(){
+    return (
+        dragging ||
+        sleeping ||
+        lookingAround ||
+        thinkingOrange ||
+        happy ||
+        happyWalk ||
+        jumping ||
+        giftEvent
+    );
+}
+
+/* 눈 생성 */
+for(let i=0;i<120;i++){
+
+    const snow=document.createElement("div");
+    snow.className="snow";
+    snow.innerHTML="❄";
+
+    snow.style.fontSize=
+        (10+Math.random()*18)+"px";
+
+    snow.style.left=
+        Math.random()*window.innerWidth+"px";
+
+    snow.style.top=
+        Math.random()*window.innerHeight+"px";
+
+    document.body.appendChild(snow);
+
+    let speed = 0.4 + Math.random() * 0.8;
+
+    setInterval(()=>{
+
+        let y=parseFloat(snow.style.top);
+
+        y+=speed;
+
+        if(y>window.innerHeight+20){
+            y=-20;
+        }
+
+        snow.style.top=y+"px";
+
+    },16);
+}
+
+/* 발자국 */
+let stepSide = false;
+
+function createFootprint(){
+
+    const fp = document.createElement("div");
+
+    fp.className = "footprint";
+    fp.innerHTML = "•";
+
+    const side = stepSide ? -18 : 18;
+
+    fp.style.left = (x + 60 + side) + "px";
+    fp.style.top = (y + 105) + "px";
+
+    stepSide = !stepSide;
+
+    document.body.appendChild(fp);
+
+    setTimeout(()=>{
+        fp.remove();
+    },8000);
+}
+
+
+/* 멍때리기 */
+function sleepMoment(){
+
+    if(isBusy()) return;
+
+    sleeping = true;
+
+    bubble.innerText = ". . .";
+    bubble.style.display = "block";
+
+    setTimeout(()=>{
+
+        euiju.src = "euiju_sit.png";
+
+        let z = 0;
+
+        const zzzAnim = setInterval(()=>{
+            const texts = ["Zzz .","Zzz . .","Zzz . . ."];
+            bubble.innerText = texts[z % 3];
+            z++;
+        },700);
+
+        const sleepTime = 5000 + Math.random()*7000;
+
+        setTimeout(()=>{
+            clearInterval(zzzAnim);
+            euiju.src = "euiju.png";
+            bubble.style.display = "none";
+            sleeping = false;
+        }, sleepTime);
+
+    }, 1800);
+}
+
+setInterval(()=>{
+    if(Math.random()<0.35){
+        sleepMoment();
+    }
+},20000);
+
+
+function createOrange(){
+
+    if(orange) return;
+
+    orange = document.createElement("div");
+    orange.innerHTML = "🍊";
+
+    orange.style.position = "absolute";
+    orange.style.fontSize = "32px";
+    orange.style.cursor = "grab";
+    orange.style.zIndex = "200";
+    orange.style.userSelect = "none";
+
+    orangeX = window.innerWidth/2;
+    orangeY = window.innerHeight/2;
+
+    orange.style.left = orangeX + "px";
+    orange.style.top = orangeY + "px";
+
+    document.body.appendChild(orange);
+
+    let draggingOrange = false;
+
+    orange.addEventListener("mousedown",()=>{
+        draggingOrange = true;
+    });
+
+    document.addEventListener("mousemove",(e)=>{
+        if(!draggingOrange) return;
+
+        orangeX = e.clientX - 16;
+        orangeY = e.clientY - 16;
+
+        orange.style.left = orangeX + "px";
+        orange.style.top = orangeY + "px";
+    });
+
+    document.addEventListener("mouseup",()=>{
+        draggingOrange = false;
+    });
+}
+
+orangeBtn.addEventListener("click", createOrange);
+
+
+function createPeel(){
+
+    const peel = document.createElement("div");
+
+    peel.innerHTML = "🍊";
+    peel.style.position = "absolute";
+    peel.style.left = (x + 40) + "px";
+    peel.style.top = (y + 90) + "px";
+    peel.style.opacity = "0.7";
+    peel.style.fontSize = "24px";
+    peel.style.pointerEvents = "none";
+
+    document.body.appendChild(peel);
+
+    setTimeout(()=>{
+        peel.remove();
+    },180000);
+}
+
+
+
+function startLookingAround(){
+    if(isBusy()) return;
+
+    lookingAround = true;
+    lookStart = Date.now();
+
+    bubble.innerText = "◉ _ ◉";
+    bubble.style.display = "block";
+}
+
+function startOrangeThinking(){
+    if(isBusy()) return;
+
+    thinkingOrange = true;
+    orangeThinkStart = Date.now();
+
+    bubble.innerText = "🍊 . . .";
+    bubble.style.display = "block";
+}
+
+setInterval(()=>{
+    if(Math.random() < 0.18){
+        startLookingAround();
+    }
+},15000);
+
+setInterval(()=>{
+    if(Math.random() < 0.12){
+        startOrangeThinking();
+    }
+},22000);
+
+
+
+function startJump(){
+
+    if(isBusy()) return;
+
+    jumping = true;
+    jumpStart = Date.now();
+
+    bubble.innerText = " ! ! ! ";
+    bubble.style.display = "block";
+}
+
+setInterval(()=>{
+    if(Math.random() < 0.08){
+        startJump();
+    }
+},18000);
+
+
+
+
+const collectionCounts = {};
+let allGiftsUnlocked = false;
+
+const giftMessages = {
+    "🍊": "귤!",
+    "🧡": "쭈랑해",
+    "🍀": "이거 내 행운인데 나눠줄게ㅎㅎ",
+    "🎁": "쭈노우맨의 선물",
+    "🌙": "LUNÉ",
+    "🐺": "아우우우..."
+};
+
+function updateCollection(){
+
+    const shelf = document.getElementById("collectionShelf");
+    const tooltip = document.getElementById("giftTooltip");
+
+    shelf.innerHTML = "";
+
+    Object.entries(collectionCounts).forEach(([emoji,count])=>{
+
+        const item = document.createElement("div");
+
+        item.style.fontSize = "18px";
+        item.style.opacity = ".85";
+        item.style.cursor = "help";
+
+        item.innerHTML =
+            count > 1 ? `${emoji}<span style="font-size:11px;color:#8ea2c2;"> x${count}</span>` : emoji;
+
+        item.addEventListener("mouseenter",()=>{
+            tooltip.textContent = giftMessages[emoji];
+            tooltip.style.display = "block";
+        });
+
+        item.addEventListener("mouseleave",()=>{
+            tooltip.style.display = "none";
+        });
+
+        shelf.appendChild(item);
+    });
+}
+
+function createGift(){
+
+    const gifts = ["🍊","🧡","🍀","🎁","🌙","🐺"];
+    const gift = document.createElement("div");
+
+    const giftType = gifts[Math.floor(Math.random()*gifts.length)];
+    const giftX = vx > 0 ? x + 110 : x + 10;
+
+    gift.innerHTML = giftType;
+    gift.style.position = "absolute";
+    gift.style.left = giftX + "px";
+    gift.style.top = (y + 55) + "px";
+    gift.style.fontSize = "28px";
+    gift.style.cursor = "pointer";
+    gift.style.zIndex = "50";
+    gift.style.transition = "top .45s ease, transform .2s ease";
+
+    gift.addEventListener("click",()=>{
+
+        collectionCounts[giftType] =
+            (collectionCounts[giftType] || 0) + 1;
+
+        updateCollection();
+
+        const requiredGifts = ["🍊","🧡","🍀","🎁","🌙","🐺"];
+
+        if(
+            !allGiftsUnlocked &&
+            requiredGifts.every(g => collectionCounts[g] >= 1)
+        ){
+            allGiftsUnlocked = true;
+
+            const notice = document.createElement("div");
+            notice.innerHTML = "❄ 모든 선물을 발견했다 ❄";
+            notice.style.position = "fixed";
+            notice.style.left = "50%";
+            notice.style.top = "50%";
+            notice.style.transform = "translate(-50%,-50%)";
+            notice.style.padding = "18px 28px";
+            notice.style.borderRadius = "20px";
+            notice.style.background = "rgba(255,255,255,.85)";
+            notice.style.backdropFilter = "blur(20px)";
+            notice.style.fontSize = "24px";
+            notice.style.color = "#6d86b2";
+            notice.style.zIndex = "9999";
+
+            document.body.appendChild(notice);
+
+            document.getElementById("allGiftBadge").style.display = "block";
+
+            setTimeout(()=>{
+                notice.remove();
+            },3500);
+        }
+
+        bubble.innerText = "쭈노우맨의 선물 발견!";
+        bubble.style.display = "block";
+
+        setTimeout(()=>{
+            if(!sleeping && !happy && !happyWalk){
+                bubble.style.display = "none";
+            }
+        },1800);
+
+        gift.remove();
+    });
+
+    document.body.appendChild(gift);
+
+    setTimeout(()=>{
+        gift.style.top = (y + 90) + "px";
+    },10);
+}
+
+
+function startGiftEvent(){
+
+    if(isBusy()) return;
+
+    if(orangeCount < 20 || dragCount < 30) return;
+
+    giftEvent = true;
+    giftStart = Date.now();
+
+    bubble.innerText = "🎁...";
+    bubble.style.display = "block";
+}
+
+setInterval(()=>{
+    if(Math.random() < 0.03){
+        startGiftEvent();
+    }
+},25000);
+
+
+/* 움직임 */
+let footprintTimer=0;
+
+function update(){
+
+    if(dragging){
+        x += (targetX - x) * 0.18;
+        y += (targetY - y) * 0.18;
+    }
+
+    if(!dragging && !sleeping && !happy && !lookingAround && !thinkingOrange){
+
+        const oldX=x;
+        const oldY=y;
+
+        x+=vx;
+        y+=vy;
+
+        if(x<0 || x>window.innerWidth-140){
+
+            vx*=-1;
+
+            euiju.style.transform=
+                vx>0 ? "scaleX(1)" : "scaleX(-1)";
+        }
+
+        if(y<0 || y>window.innerHeight-140){
+            vy*=-1;
+        }
+
+        if(Math.random()<0.003){
+
+            vx=(Math.random()-0.5)*2;
+            vy=(Math.random()-0.5)*2;
+
+            euiju.style.transform=
+                vx>0 ? "scaleX(1)" : "scaleX(-1)";
+        }
+
+        totalDistance += Math.hypot(
+            x-oldX,
+            y-oldY
+        )/40;
+
+        distanceText.textContent=
+            Math.floor(totalDistance);
+
+        footprintTimer++;
+
+        if(footprintTimer>60){
+
+    createFootprint();
+    footprintTimer=0;
+}
+    }
+
+    euiju.style.left=x+"px";
+    euiju.style.top=y+"px";
+
+    if(sleeping){
+
+        const breathe =
+        Math.sin(Date.now()/850) * 0.025;
+
+        const sleepBounce =
+        Math.sin(Date.now()/900) * 2;
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} translateY(${sleepBounce}px) scale(${1+breathe})`;
+
+    } else if(lookingAround){
+
+        const lookDir =
+        Math.floor((Date.now()-lookStart)/700) % 2;
+
+        euiju.style.transform =
+        lookDir === 0 ? "scaleX(1)" : "scaleX(-1)";
+
+        if(Date.now() - lookStart > 3000){
+            lookingAround = false;
+            bubble.style.display = "none";
+        }
+
+    } else if(thinkingOrange){
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"}`;
+
+        if(Date.now() - orangeThinkStart > 3500){
+            thinkingOrange = false;
+            bubble.style.display = "none";
+        }
+
+    } else if(happy){
+
+        const elapsed = Date.now() - happyStart;
+
+        if(elapsed < 1200){
+
+            const munchBounce =
+            Math.abs(Math.sin(Date.now()/140)) * -10;
+
+            euiju.style.transform =
+            `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} translateY(${munchBounce}px)`;
+
+        }else{
+
+            const wiggle =
+Math.sin(Date.now()/500) * 5;
+
+            euiju.style.transformOrigin = "50% 98%";
+
+            euiju.style.transform =
+            `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} rotate(${wiggle}deg)`;
+        }
+
+    } else if(jumping){
+
+        const progress = Math.min(1,(Date.now()-jumpStart)/900);
+        const jumpHeight = Math.sin(progress * Math.PI) * -35;
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} translateY(${jumpHeight}px)`;
+
+        if(progress >= 1){
+            jumping = false;
+            bubble.innerText = "◉ ◡ ◉";
+            setTimeout(()=>{
+                if(!happy && !sleeping) bubble.style.display = "none";
+            },800);
+        }
+
+    } else if(giftEvent){
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"}`;
+
+        const elapsed = Date.now() - giftStart;
+
+        if(elapsed > 1200 && elapsed < 2200){
+            bubble.innerText = "◉ ◡ ◉";
+        }
+
+        if(elapsed > 2200){
+
+            createGift();
+
+            bubble.innerText = "◉ ◡ ◉🎁";
+
+            setTimeout(()=>{
+                bubble.style.display = "none";
+            },1800);
+
+            giftEvent = false;
+        }
+
+    } else if(happyWalk){
+
+        const bounce = Math.abs(Math.sin(Date.now()/180)) * -8;
+        const wiggle = Math.sin(Date.now()/180) * 5;
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} translateY(${bounce}px) rotate(${wiggle}deg)`;
+
+        if(Date.now() > happyWalkEnd){
+            happyWalk = false;
+            bubble.style.display = "none";
+        }
+
+    } else if(!dragging){
+
+        const wobble = Math.sin(Date.now()/120) * 3;
+        const bounce = Math.abs(Math.sin(Date.now()/120)) * -4;
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} translateY(${bounce}px) rotate(${wobble}deg)`;
+
+    } else {
+
+        const dangle = Math.sin(Date.now()/100) * 15;
+        const speedTilt = Math.min(35, mouseSpeed * 0.7);
+
+        euiju.style.transform =
+        `${vx>0 ? "scaleX(1)" : "scaleX(-1)"} rotate(${dangle + speedTilt}deg)`;
+    }
+
+    bubble.style.left=(x+60)+"px";
+    bubble.style.top=(y-50)+"px";
+
+    
+    if(orange){
+
+        const dx = (orangeX + 16) - (x + 70);
+        const dy = (orangeY + 16) - (y + 70);
+
+        const dist = Math.hypot(dx,dy);
+
+        if(dist < 80){
+
+            happy = true;
+            happyStart = Date.now();
+
+            orangeCount++;
+            orangeCountText.textContent = orangeCount;
+
+            bubble.innerText = "냠!";
+            bubble.style.display = "block";
+
+            orange.remove();
+            orange = null;
+
+            if(Math.random() < 0.12){
+
+                setTimeout(()=>{
+                    bubble.innerText = "◉ ◡ ◉✨";
+                    createPeel();
+                },1200);
+
+            }
+
+            setTimeout(()=>{
+                bubble.innerText = "◉ ◡ ◉🧡";
+            },1200);
+
+            setTimeout(()=>{
+                if(!sleeping){
+                    bubble.style.display = "none";
+                }
+                happy = false;
+
+                if(Math.random() < 0.12){
+
+                    happyWalk = true;
+                    happyWalkEnd = Date.now() + 10000;
+
+                    let musicFrame = 0;
+
+                    const musicAnim = setInterval(()=>{
+
+                        if(!happyWalk){
+                            clearInterval(musicAnim);
+                            return;
+                        }
+
+                        const notes = ["♪","♫","♪♫"];
+                        bubble.innerText = notes[musicFrame % 3];
+                        bubble.style.display = "block";
+                        musicFrame++;
+
+                    },700);
+                }
+
+            },4200);
+        }
+    }
+
+    requestAnimationFrame(update);
+}
+
+update();
+
+const observeTime=document.getElementById("observeTime");
+const startTime=Date.now();
+setInterval(()=>{
+const sec=Math.floor((Date.now()-startTime)/1000);
+const h=String(Math.floor(sec/3600)).padStart(2,"0");
+const m=String(Math.floor((sec%3600)/60)).padStart(2,"0");
+const s=String(sec%60).padStart(2,"0");
+observeTime.textContent=`${h}:${m}:${s}`;
+},1000);
+
+/* 드래그 */
+
+euiju.addEventListener("mousedown",(e)=>{
+
+    dragging=true;
+    euiju.style.cursor="grabbing";
+    euiju.style.scale="1.05";
+
+    dragCount++;
+    dragText.textContent=dragCount;
+
+    bubble.innerText="?!";
+    bubble.style.display="block";
+
+    const offsetX=e.clientX-x;
+    const offsetY=e.clientY-y;
+
+    function move(ev){
+
+    if(!dragging) return;
+
+    targetX = ev.clientX - offsetX;
+    targetY = ev.clientY - offsetY;
+
+    mouseSpeed = Math.hypot(
+        targetX - prevTargetX,
+        targetY - prevTargetY
+    );
+
+    prevTargetX = targetX;
+    prevTargetY = targetY;
+}
+
+    function up(){
+
+        dragging=false;
+        euiju.style.cursor="grab";
+        euiju.style.scale="1";
+
+        bubble.innerText="◉ ⎵ ◉ 💦";
+        setTimeout(()=>{
+            bubble.style.display="none";
+        },1500);
+
+        document.removeEventListener(
+            "mousemove",
+            move
+        );
+
+        document.removeEventListener(
+            "mouseup",
+            up
+        );
+    }
+
+    document.addEventListener(
+        "mousemove",
+        move
+    );
+
+    document.addEventListener(
+        "mouseup",
+        up
+    );
+});
+
+
+const helpBtn=document.getElementById("helpBtn");
+const helpOverlay=document.getElementById("helpOverlay");
+const closeHelp=document.getElementById("closeHelp");
+
+helpBtn.addEventListener("click",()=>{
+ helpOverlay.style.display="flex";
+});
+
+closeHelp.addEventListener("click",()=>{
+ helpOverlay.style.display="none";
+});
+
+helpOverlay.addEventListener("click",(e)=>{
+ if(e.target===helpOverlay){
+   helpOverlay.style.display="none";
+ }
+});
+
+
+const debugBtn=document.getElementById("debugBtn");
+const debugPanel=document.getElementById("debugPanel");
+
+debugBtn.addEventListener("click",()=>{
+ debugPanel.style.display =
+ debugPanel.style.display==="block" ? "none" : "block";
+});
+
+document.getElementById("testSleep").addEventListener("click",()=>{
+ sleepMoment();
+});
+
+document.getElementById("testLook").addEventListener("click",()=>{
+ startLookingAround();
+});
+
+document.getElementById("testOrange").addEventListener("click",()=>{
+ startOrangeThinking();
+});
+
+document.getElementById("testJump").addEventListener("click",()=>{
+ startJump();
+});
+
+document.getElementById("testHappy").addEventListener("click",()=>{
+
+    if(isBusy()) return;
+
+    happyWalk = true;
+    happyWalkEnd = Date.now() + 10000;
+
+    let musicFrame = 0;
+
+    const musicAnim = setInterval(()=>{
+        if(!happyWalk){
+            clearInterval(musicAnim);
+            return;
+        }
+
+        const notes = ["♪","♫","♪♫"];
+        bubble.innerText = notes[musicFrame % 3];
+        bubble.style.display = "block";
+        musicFrame++;
+    },700);
+});
+
+document.getElementById("testEat").addEventListener("click",()=>{
+
+    if(isBusy()) return;
+
+    happy = true;
+    happyStart = Date.now();
+
+    bubble.innerText = "냠!";
+    bubble.style.display = "block";
+
+    setTimeout(()=>{
+        bubble.innerText = "◉ ◡ ◉🧡";
+    },1200);
+
+    setTimeout(()=>{
+        happy = false;
+        bubble.style.display = "none";
+    },4200);
+});
+
+document.getElementById("testSparkle").addEventListener("click",()=>{
+
+    if(isBusy()) return;
+
+    bubble.innerText = "◉ ◡ ◉✨";
+    bubble.style.display = "block";
+
+    setTimeout(()=>{
+        bubble.style.display = "none";
+    },2500);
+});
+
+
+document.getElementById("testGift").addEventListener("click",()=>{
+    orangeCount = Math.max(orangeCount,10);
+    dragCount = Math.max(dragCount,10);
+    orangeCountText.textContent = orangeCount;
+    dragText.textContent = dragCount;
+    startGiftEvent();
+});
+
+document.getElementById("testAllGifts").addEventListener("click",()=>{
+
+    ["🍊","🧡","🍀","🎁","🌙","🐺"].forEach(g=>{
+        collectionCounts[g] = 1;
+    });
+
+    updateCollection();
+
+    allGiftsUnlocked = true;
+    document.getElementById("allGiftBadge").style.display = "block";
+
+    const notice = document.createElement("div");
+    notice.innerHTML = "❄ 모든 선물을 발견했다 ❄";
+    notice.style.position = "fixed";
+    notice.style.left = "50%";
+    notice.style.top = "50%";
+    notice.style.transform = "translate(-50%,-50%)";
+    notice.style.padding = "18px 28px";
+    notice.style.borderRadius = "20px";
+    notice.style.background = "rgba(255,255,255,.85)";
+    notice.style.backdropFilter = "blur(20px)";
+    notice.style.fontSize = "24px";
+    notice.style.color = "#6d86b2";
+    notice.style.zIndex = "9999";
+
+    document.body.appendChild(notice);
+
+    setTimeout(()=>{
+        notice.remove();
+    },3500);
+});
+
+</script>
+
+</body>
+</html>
