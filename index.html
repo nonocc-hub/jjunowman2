@@ -1019,8 +1019,21 @@ euiju.addEventListener("mousedown",(e)=>{
 
     if(!dragging) return;
 
-    targetX = ev.clientX - offsetX;
-    targetY = ev.clientY - offsetY;
+    targetX = Math.max(
+        0,
+        Math.min(
+            ev.clientX - offsetX,
+            window.innerWidth - 140
+        )
+    );
+
+    targetY = Math.max(
+        0,
+        Math.min(
+            ev.clientY - offsetY,
+            window.innerHeight - 140
+        )
+    );
 
     mouseSpeed = Math.hypot(
         targetX - prevTargetX,
