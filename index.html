@@ -264,6 +264,18 @@ color:#5f759f;
 
 <button id="helpBtn">?</button>
 
+<button id="debugBtn" style="position:fixed;top:70px;right:20px;width:42px;height:42px;border:none;border-radius:50%;background:rgba(255,255,255,.28);backdrop-filter:blur(24px);font-size:18px;cursor:pointer;z-index:1200;">⚙</button>
+
+<div id="debugPanel" style="display:none;position:fixed;top:120px;right:20px;padding:12px;background:rgba(255,255,255,.85);backdrop-filter:blur(24px);border-radius:16px;z-index:2200;">
+<button id="testSleep">😴 잠자기</button><br><br>
+<button id="testLook">👀 두리번</button><br><br>
+<button id="testOrange">🍊 귤생각</button><br><br>
+<button id="testJump">🦘 폴짝</button><br><br>
+<button id="testHappy">🎵 행복산책</button><br><br>
+<button id="testEat">🍊 냠!</button><br><br>
+<button id="testSparkle">✨ 반짝</button><br><br><button id="testGift">🎁 선물놓기</button><br><br><button id="testAllGifts">❄ 선물 올클리어</button>
+</div>
+
 <div id="helpOverlay">
   <div id="helpModal">
     <div class="helpTitle">☃️ 쭈노우맨 관찰 가이드</div>
@@ -1072,7 +1084,100 @@ helpOverlay.addEventListener("click",(e)=>{
 });
 
 
-updateCollection();
+const debugBtn=document.getElementById("debugBtn");
+const debugPanel=document.getElementById("debugPanel");
+
+debugBtn.addEventListener("click",()=>{
+ debugPanel.style.display =
+ debugPanel.style.display==="block" ? "none" : "block";
+});
+
+document.getElementById("testSleep").addEventListener("click",()=>{
+ sleepMoment();
+});
+
+document.getElementById("testLook").addEventListener("click",()=>{
+ startLookingAround();
+});
+
+document.getElementById("testOrange").addEventListener("click",()=>{
+ startOrangeThinking();
+});
+
+document.getElementById("testJump").addEventListener("click",()=>{
+ startJump();
+});
+
+document.getElementById("testHappy").addEventListener("click",()=>{
+
+    if(isBusy()) return;
+
+    happyWalk = true;
+    happyWalkEnd = Date.now() + 10000;
+
+    let musicFrame = 0;
+
+    const musicAnim = setInterval(()=>{
+        if(!happyWalk){
+            clearInterval(musicAnim);
+            return;
+        }
+
+        const notes = ["♪","♫","♪♫"];
+        bubble.innerText = notes[musicFrame % 3];
+        bubble.style.display = "block";
+        musicFrame++;
+    },700);
+});
+
+document.getElementById("testEat").addEventListener("click",()=>{
+
+    if(isBusy()) return;
+
+    happy = true;
+    happyStart = Date.now();
+
+    bubble.innerText = "냠!";
+    bubble.style.display = "block";
+
+    setTimeout(()=>{
+        bubble.innerText = "◉ ◡ ◉🧡";
+    },1200);
+
+    setTimeout(()=>{
+        happy = false;
+        bubble.style.display = "none";
+    },4200);
+});
+
+document.getElementById("testSparkle").addEventListener("click",()=>{
+
+    if(isBusy()) return;
+
+    bubble.innerText = "◉ ◡ ◉✨";
+    bubble.style.display = "block";
+
+    setTimeout(()=>{
+        bubble.style.display = "none";
+    },2500);
+});
+
+
+document.getElementById("testGift").addEventListener("click",()=>{
+    orangeCount = Math.max(orangeCount,10);
+    dragCount = Math.max(dragCount,10);
+    orangeCountText.textContent = orangeCount;
+    dragText.textContent = dragCount;
+    startGiftEvent();
+});
+
+document.getElementById("testAllGifts").addEventListener("click",()=>{
+
+    ["🍊","🧡","🍀","🎁","🌙","🐺"].forEach(g=>{
+        collectionCounts[g] = 1;
+    });
+
+    updateCollection();
 
     allGiftsUnlocked = true;
     document.getElementById("allGiftBadge").style.display = "block";
